@@ -1,0 +1,4 @@
+"""PS H:\Projects\animal_shelter> python manage.py createsuperuser
+Username :admin
+Email address: admin@gmail.com
+Password:0000
