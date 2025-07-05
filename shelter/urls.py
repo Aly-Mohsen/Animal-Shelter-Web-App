@@ -6,5 +6,5 @@ app_name = 'shelter'
 
 urlpatterns = [
     path('',views.home, name = 'home'),
-    
+    path('animals/',views.animal_list,name = 'animals_list',)
 ]
