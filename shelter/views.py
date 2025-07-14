@@ -16,7 +16,7 @@ def home(request):
     return render(request,'shelter/home.html',context)
 
 def animal_list(request):
-    animals = animals.objects.filter(status='available').order_by('-arrival_date')
+    animals = Animal.objects.filter(status='available').order_by('-arrival_date')
 
     # Fetch all animal types for filtering
     animal_types = AnimalType.objects.all()
