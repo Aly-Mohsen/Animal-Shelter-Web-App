@@ -1,7 +1,19 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
+
+
+class CustomUser(AbstractUser):
+    full_name = models.CharField(max_length=150, blank=False)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    profile_photo = models.ImageField(upload_to="users/", blank=True, null=True)
+
+    def __str__(self):
+        return self.username
+
 
 class AnimalType(models.Model):
     name = models.CharField(max_length=50)
@@ -10,13 +22,15 @@ class AnimalType(models.Model):
     def __str__(self):
         return self.name
 
+
 class Breed(models.Model):
     name = models.CharField(max_length=100)
     animal_type = models.ForeignKey(AnimalType, on_delete=models.CASCADE)
-    description = models.TextField(blank=True, null = True)
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} ({self.animal_type})"
+
 
 class Animal(models.Model):
     GENDER_CHOICES = [
@@ -51,6 +65,7 @@ class Animal(models.Model):
     class Meta:
         ordering = ['-arrival_date']
 
+
 class AnimalPhoto(models.Model):
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name='photos')
     photo = models.ImageField(upload_to='animals/', blank=True, null=True)
@@ -72,10 +87,9 @@ class AdoptionApplication(models.Model):
     ]
 
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE)
-    applicant = models.ForeignKey(User, on_delete=models.CASCADE)
+    applicant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # ✅ use CustomUser
     application_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    # home_visit_date = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
     living_situation = models.TextField(help_text="Describe your living situation (house, apartment, etc.)")
     has_other_pets = models.BooleanField(default=False)
@@ -88,4 +102,3 @@ class AdoptionApplication(models.Model):
 
     class Meta:
         ordering = ['-application_date']
-

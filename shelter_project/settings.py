@@ -26,7 +26,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY',default='c+(oc(@hw#-ihxu^uw6=vscz%l!w0es)%_x+q2lv080i*h!+1_')
+SECRET_KEY = env(
+    'SECRET_KEY', default='c+(oc(@hw#-ihxu^uw6=vscz%l!w0es)%_x+q2lv080i*h!+1_')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=True)
@@ -44,7 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'shelter', 
+    "crispy_forms",
+    "crispy_bootstrap5",
+    'shelter',
 ]
 
 MIDDLEWARE = [
@@ -146,3 +149,15 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For developm
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Redirects after login/logout
+LOGIN_REDIRECT_URL = "shelter:home"
+LOGOUT_REDIRECT_URL = "shelter:home"
+LOGIN_URL = "login"
+
+
+AUTH_USER_MODEL = "shelter.CustomUser"
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

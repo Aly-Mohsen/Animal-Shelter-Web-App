@@ -1,0 +1,92 @@
+/* ==========================================
+   Global Styles
+   ========================================== */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   Navbar
+   ========================================== */
+.navbar-brand img {
+    height: 40px;
+}
+
+/* ==========================================
+   Animal Cards
+   ========================================== */
+.animal-card {
+    transition: transform 0.3s;
+}
+.animal-card:hover {
+    transform: translateY(-5px);
+}
+
+/* ==========================================
+   Hero Section
+   ========================================== */
+.hero-section {
+    background-image: linear-gradient(
+        rgba(0, 0, 0, 0.5), 
+        rgba(0, 0, 0, 0.5)
+    ),
+    url("../images/home-bg.jpg");
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 100px 0;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.hero-section .hero-title {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+/* ==========================================
+   Footer
+   ========================================== */
+footer {
+    background-color: #f8f9fa;
+    padding: 20px 0;
+    margin-top: 40px;
+}
+
+footer h5 {
+    font-weight: bold;
+}
+
+footer .social-icons a {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+footer .social-icons a:hover {
+    color: #000;
+}
+
+/* ==========================================
+   Shared background for login/signup
+   ========================================== */
+   
+.auth-section {
+    min-height: 100vh; /* full screen */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url("../images/auth2-bg.jpg") no-repeat center center;
+    background-size: cover; /* ensures image covers screen without stretching */
+    background-attachment: fixed; /* optional: parallax-like effect */
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.9); /* slightly transparent white */
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 420px; /* keeps form nicely sized */
+}
+

@@ -1,6 +1,14 @@
+from urllib import request
 from django.shortcuts import get_object_or_404, render
 
 from shelter.models import *
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from django.conf import settings
+from .forms import CustomUserCreationForm
+
+from django.contrib.auth.views import LoginView
+from .forms import CustomLoginForm
 
 
 # Create your views here.
@@ -35,6 +43,23 @@ def animal_list(request):
 
     return render(request,'shelter/animal_list.html',context)
 
+def signup(request):
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # log in immediately
+            # Redirect to ?next= if provided, otherwise to LOGIN_REDIRECT_URL
+            return redirect(request.GET.get("next", settings.LOGIN_REDIRECT_URL))
+        form.fields['help_text']
+    else:
+        form = CustomUserCreationForm()
+    print(form.errors)
+    return render(request, "registration/signup.html", {"form": form})
+
+class CustomLoginView(LoginView):
+    authentication_form = CustomLoginForm
+    template_name = "registration/login.html"
 
 def animal_detail(request,animal_id):
     animal = get_object_or_404(Animal,id = animal_id)

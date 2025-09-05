@@ -1,0 +1,33 @@
+<footer class="mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Paws & Whiskers Shelter</h5>
+                    <p>Provide loving homes for animals in need .</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'shelter:home' %}" class="text-decoration-none">Home</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <address>
+                        Address Placeholder<br>
+                        <i class="bi bi-telephone"></i> (123) 456-7890<br>
+                        <i class="bi bi-envelope"></i> info@Paws&Whiskers.org
+                    </address>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; {% now "Y" %} Paws & Whiskers Animal Shelter. All rights reserved.</p>
+                <div class="social-icons">
+                    <a href="#" class="text-decoration-none me-2"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-decoration-none me-2"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="text-decoration-none me-2"><i class="bi bi-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
