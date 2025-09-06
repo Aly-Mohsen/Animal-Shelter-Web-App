@@ -51,7 +51,6 @@ def signup(request):
             login(request, user)  # log in immediately
             # Redirect to ?next= if provided, otherwise to LOGIN_REDIRECT_URL
             return redirect(request.GET.get("next", settings.LOGIN_REDIRECT_URL))
-        form.fields['help_text']
     else:
         form = CustomUserCreationForm()
     print(form.errors)

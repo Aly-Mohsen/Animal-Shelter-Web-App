@@ -10,10 +10,53 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form|crispy }}
+            <button type="submit" class="btn btn-success w-100">Sign Up</button>
         </form>
         <p class="mt-3 text-center">
             Already have an account? <a href="{% url 'shelter:login' %}">Log in here</a>.
         </p>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const phoneInputField = document.querySelector("#id_phone");
+  if (phoneInputField) {
+    const iti = window.intlTelInput(phoneInputField, {
+      initialCountry: "eg",
+      preferredCountries: ["eg", "ae", "us", "gb"],
+      separateDialCode: true,
+    });
+
+    // Save full number (+20 1234567890)
+    const form = phoneInputField.closest("form");
+    form.addEventListener("submit", function() {
+      phoneInputField.value = iti.getNumber();
+    });
+  }
+</script>
+<script>
+  (function() {
+    // attach focus/blur listeners to each .mb-3 container's inputs
+    document.querySelectorAll('.mb-3').forEach(function(container) {
+      var controls = container.querySelectorAll('input, textarea, select');
+      if (!controls.length) return;
+
+      controls.forEach(function(ctrl) {
+        ctrl.addEventListener('focus', function() {
+          container.classList.add('focused');
+        });
+        ctrl.addEventListener('blur', function() {
+          // small timeout to allow focus to move to another element inside container
+          setTimeout(function() {
+            if (!container.contains(document.activeElement)) {
+              container.classList.remove('focused');
+            }
+          }, 0);
+        });
+      });
+    });
+  })();
+</script>
 {% endblock %}

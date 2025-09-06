@@ -4,10 +4,23 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 
+GOVERNORATE_CHOICES = [
+    ("cairo", "Cairo"),
+    ("giza", "Giza"),
+    ("alexandria", "Alexandria"),
+    ("luxor", "Luxor"),
+    ("aswan", "Aswan"),
+    # add more as needed
+]
 
 class CustomUser(AbstractUser):
     full_name = models.CharField(max_length=150, blank=False)
-    phone = models.CharField(max_length=15, blank=True, null=True)
+    phone = models.CharField(
+        max_length=20, 
+        blank=True, 
+        null=True, 
+    )
+    governorate = models.CharField(max_length=100, choices=GOVERNORATE_CHOICES, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     profile_photo = models.ImageField(upload_to="users/", blank=True, null=True)
 
