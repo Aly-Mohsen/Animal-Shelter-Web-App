@@ -19,6 +19,7 @@ body {
 .animal-card {
     transition: transform 0.3s;
 }
+
 .animal-card:hover {
     transform: translateY(-5px);
 }
@@ -27,11 +28,9 @@ body {
    Hero Section
    ========================================== */
 .hero-section {
-    background-image: linear-gradient(
-        rgba(0, 0, 0, 0.5), 
-        rgba(0, 0, 0, 0.5)
-    ),
-    url("../images/home-bg.jpg");
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5),
+            rgba(0, 0, 0, 0.5)),
+        url("../images/home-bg.jpg");
     background-size: cover;
     background-position: center;
     color: white;
@@ -70,23 +69,78 @@ footer .social-icons a:hover {
 /* ==========================================
    Shared background for login/signup
    ========================================== */
-   
+
 .auth-section {
-    min-height: 100vh; /* full screen */
+    min-height: 100vh;
+    /* full screen */
     display: flex;
     align-items: center;
     justify-content: center;
     background: url("../images/auth2-bg.jpg") no-repeat center center;
-    background-size: cover; /* ensures image covers screen without stretching */
-    background-attachment: fixed; /* optional: parallax-like effect */
+    background-size: cover;
+    /* ensures image covers screen without stretching */
+    background-attachment: fixed;
+    /* optional: parallax-like effect */
 }
 
 .auth-card {
-    background: rgba(255, 255, 255, 0.9); /* slightly transparent white */
+    background: rgba(255, 255, 255, 0.9);
+    /* slightly transparent white */
     padding: 2rem;
     border-radius: 1rem;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     width: 100%;
-    max-width: 420px; /* keeps form nicely sized */
+    max-width: 420px;
+    /* keeps form nicely sized */
 }
 
+/* ==========================================
+      Form Helper Text Behavior
+      ========================================== */
+/* Hide help text by default */
+/* ========= hide helper text by default ========= */
+.form-text {
+    display: none !important;
+    /* completely hidden by default */
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.18s ease, max-height 0.18s ease;
+}
+
+/* ========= show when the field container has keyboard or mouse focus ========= */
+/* Uses :focus-within on the container that wraps label+input+helptext (your markup uses .mb-3) */
+.mb-3:focus-within .form-text {
+    display: block !important;
+    opacity: 1 !important;
+    max-height: 200px !important;
+}
+
+/* Fallback for cases where help text is an immediate sibling (keeps compatibility) */
+.form-control:focus+.form-text,
+textarea.form-control:focus+.form-text,
+select.form-select:focus+.form-text,
+input[type="file"]:focus+.form-text {
+    display: block !important;
+    opacity: 1 !important;
+    max-height: 200px !important;
+}
+
+/* When a container has a helper class added by JS (JS fallback below) */
+.mb-3.focused .form-text {
+    display: block !important;
+    opacity: 1 !important;
+    max-height: 200px !important;
+}
+
+
+/* Only affect the phone input wrapper */
+#div_id_phone .form-label {
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+#div_id_phone .iti {
+    width: 100%;
+    /* phone input stretches properly */
+}
