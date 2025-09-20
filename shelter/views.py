@@ -1,6 +1,6 @@
 from urllib import request
 from django.shortcuts import get_object_or_404, render
-
+from django.contrib import messages
 from shelter.models import *
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
@@ -43,6 +43,10 @@ def animal_list(request):
 
     return render(request,'shelter/animal_list.html',context)
 
+def animal_detail(request, pk):
+    animal = get_object_or_404(Animal, pk=pk)
+    return render(request, "shelter/animal_detail.html", {"animal": animal})
+
 def signup(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST, request.FILES)
@@ -59,10 +63,3 @@ def signup(request):
 class CustomLoginView(LoginView):
     authentication_form = CustomLoginForm
     template_name = "registration/login.html"
-
-def animal_detail(request,animal_id):
-    animal = get_object_or_404(Animal,id = animal_id)
-    context ={
-        'animal':animal,
-    }
-    return render(request,'shelter/animal_detail.html',context)
