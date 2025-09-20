@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row">
+    <div class="col-md-5">
+      {% if animal.photo %}
+        <img src="{{ animal.photo.url }}" class="img-fluid rounded shadow" alt="{{ animal.name }}">
+      {% else %}
+        <img src="{% static 'images/placeholder.png' %}" class="img-fluid rounded shadow" alt="No image available">
+      {% endif %}
+    </div>
+    <div class="col-md-7">
+      <h2>{{ animal.name }}</h2>
+      <p><strong>Species:</strong> {{ animal.species }}</p>
+      <p><strong>Age:</strong> {{ animal.age }} years</p>
+      <p><strong>Status:</strong> {{ animal.get_status_display }}</p>
+      <p><strong>Description:</strong></p>
+      <p>{{ animal.description|linebreaks }}</p>
+
+      <a href="{% url 'shelter:animal_list' %}" class="btn btn-secondary">Back to Animals</a>
+      <a href="#" class="btn btn-primary">Adopt {{ animal.name }}</a> <!-- future adoption logic -->
+    </div>
+  </div>
+</div>
+{% endblock %}

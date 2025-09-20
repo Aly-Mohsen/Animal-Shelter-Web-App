@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Animals Available for Adoption</h2>
+    <div class="row">
+        {%for animal in animals %}
+        <div class="col-md-4 mb-3">
+            <div class=" card animal-card">
+
+                <!--Create Animal Photo path  -->
+                {% if animal.photo %}
+                <img src="{{ animal.photo.url }}" class="card-img-top" alt="{{ animal.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ animal.name }}</h5>
+                    <p class="card-text">{{ animal.description|truncatewords:20 }}</p>
+                    <a href="{% url 'shelter:animal_detail' animal.pk %}" class="stretched-link">View</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p>No animals available at the moment.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

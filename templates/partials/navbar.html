@@ -1,40 +1,33 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'shelter:home' %}">
-                <i class="bi bi-heart-fill text-danger"></i> Paws & Whiskers
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'shelter:home' %}">Home</a>
-                    </li>
-                </ul>
-                <div class="d-flex">
-                    {% if user.is_authenticated %}
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userMenu"
-                            data-bs-toggle="dropdown">
-                            <i class="bi bi-person-fill"></i> {{ user.username }}
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'shelter:home' %}">
+            <img src="{% static 'shelter/images/logo.png' %}" alt="Paws & Whiskers" height="40" class="me-2">
+            <span class="fw-bold">Paws & Whiskers</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'shelter:home' %}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'shelter:animal_list' %}">Animals</a></li>
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <form method="post" action="{% url 'shelter:logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link nav-link"
+                            style="border:none; background:none; padding:0;">
+                            Logout
                         </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">My Applications</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <form method="post" action="{% url 'shelter:logout' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="dropdown-item">Logout</button>
-                            </form>
-                        </ul>
-                    </div>
-                    {% else %}
-                    <a href="{% url 'shelter:login' %}" class="btn btn-outline-primary me-2">Login</a>
-                    <a href="{% url 'shelter:signup' %}?next={{ request.path }}" class="btn btn-primary">Register</a>
-                    {% endif %}
-                </div>
-            </div>
+                    </form>
+                </li>
+                {% else %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'shelter:login' %}">Login</a></li>
+                <li class="nav-item"><a class="btn btn-brand ms-2" href="{% url 'shelter:signup' %}">Sign Up</a></li>
+                {% endif %}
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
