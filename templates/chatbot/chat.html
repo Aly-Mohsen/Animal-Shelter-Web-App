@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Chat with the Shelter Assistant</h2>
+
+    <div id="chat-container" class="border rounded p-3 mb-3" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+        <!-- Chat messages will appear here -->
+    </div>
+
+    <form id="chat-form" class="d-flex">
+        {% csrf_token %}
+        <input type="text" id="chat-input" class="form-control me-2" placeholder="Type your message..." autocomplete="off" required>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatContainer = document.getElementById('chat-container');
+
+    function appendMessage(sender, message) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('mb-2', 'p-2', 'rounded');
+        msgDiv.style.maxWidth = '51%';
+
+        if (sender === 'user') {
+            msgDiv.classList.add('bg-primary', 'text-white', 'ms-auto');
+        } else {
+            msgDiv.style.backgroundColor = 'magenta';
+            msgDiv.style.color = 'white';
+            msgDiv.classList.add('me-auto');
+        }
+
+        msgDiv.textContent = message;
+        chatContainer.appendChild(msgDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        appendMessage('user', message);
+        chatInput.value = '';
+        chatInput.focus();
+
+        try {
+            const response = await fetch("{% url 'chat-api' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ message }),
+            });
+
+            const data = await response.json();
+            if (data.reply) {
+                appendMessage('ai', data.reply);
+            } else if (data.error) {
+                appendMessage('ai', 'Error: ' + data.error);
+            }
+        } catch (err) {
+            appendMessage('ai', 'Network error');
+        }
+    });
+</script>
+{% endblock %}

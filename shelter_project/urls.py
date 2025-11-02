@@ -7,6 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     path('', include('shelter.urls')),
+    path('', include('chatbot.urls')),  # chatbot API
 
 ]
 
