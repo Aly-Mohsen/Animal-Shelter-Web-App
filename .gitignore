@@ -36,3 +36,8 @@ staticfiles/
 # OS files
 .DS_Store
 Thumbs.db
+
+
+# Others
+*.docx
+*.pdf
