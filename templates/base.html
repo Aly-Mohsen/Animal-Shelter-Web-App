@@ -1,9 +1,11 @@
+{% load static %}
 {% include 'partials/head.html' %}
+
 <body>
     {% include 'partials/navbar.html' %}
 
     {% include 'partials/messages.html' %}
-    
+
     {% block content %}{% endblock %}
 
     <!-- JS -->
@@ -13,6 +15,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js"></script>
 
-    {% block extra_js %}{% endblock %}
+    {% block extra_js %}
+    <link rel="stylesheet" href="{%static 'chatbot/css/chatbot.css'%}">
+    <script src="{% static 'chatbot/js/chatbot.js' %}"></script>
+    {% endblock %}
+
 </body>
 {% include 'partials/footer.html' %}
