@@ -5,9 +5,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
     path('', include('shelter.urls')),
-    path('', include('chatbot.urls')),  # chatbot API
+    path('chatbot/', include('chatbot.urls')),  # chatbot API
 
 ]
 
