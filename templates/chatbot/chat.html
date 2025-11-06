@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container py-5">
-    <h2 class="mb-4 text-center">Chat with the Shelter Assistant</h2>
+    <h2 class="mb-4 text-center">Chat with Bojack</h2>
 
     <div id="chat-container" class="border rounded p-3 mb-3" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
         <!-- Chat messages will appear here -->
@@ -50,7 +50,7 @@
         chatInput.focus();
 
         try {
-            const response = await fetch("{% url 'chat-api' %}", {
+            const response = await fetch("{% url 'chat' %}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

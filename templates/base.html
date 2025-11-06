@@ -17,6 +17,18 @@
 
     {% block extra_js %}
     <link rel="stylesheet" href="{%static 'chatbot/css/chatbot.css'%}">
+
+    <!-- Pass logged-in username to JS -->
+    {% if user.is_authenticated %}
+    <script>
+        window.loggedInUsername = "{{ user.username|escapejs }}";
+    </script>
+    {% else %}
+    <script>
+        window.loggedInUsername = null;
+    </script>
+    {% endif %}
+
     <script src="{% static 'chatbot/js/chatbot.js' %}"></script>
     {% endblock %}
 
