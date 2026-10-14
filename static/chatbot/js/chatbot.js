@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const input = document.getElementById("chat-input");
     const sendButton = document.getElementById("chat-send");
+    const chatLog = document.getElementById("chat-log");
 
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -52,13 +53,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const message = input.value.trim();
         if (!message) return;
 
-        const chatLog = document.getElementById("chat-log");
-
         // User Message
-        const userMessage = document.createElement("p");
-        userMessage.className = "user-msg";
-        userMessage.innerHTML = `<b>${UserName}:</b> ${message}`;
-        chatLog.appendChild(userMessage);
+        appendMessage(UserName, message, "user-msg");
+        // const userMessage = document.createElement("p");
+        // userMessage.className = "user-msg";
+        // userMessage.innerHTML = `<b>${UserName}:</b> ${message}`;
+        // chatLog.appendChild(userMessage);
 
         // thinking message
         const typingMessage = document.createElement("p");
@@ -79,13 +79,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ message })
             });
             data = await response.json();
+
+            if (!response.ok || typeof data.reply !== "string"){
+                throw new Error("Invalid chatbot response");
+            }
         }
         catch (error) {
             typingMessage.remove();
-            chatLog.appendChild(Object.assign(document.createElement("p"), {
-                className: "bot-msg",
-                innerHTML: "<b>Bojack:</b> Bojack is having an existential crisis. Please try again later."
-            }));
+
+            appendMessage(
+                "Bojack",
+                "Bojack is having an existential crisis. Please try again later.",
+                "bot-msg"
+            );
+
             return;
         }
 
@@ -95,20 +102,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         // Split bot response into sentences and display each
-        const rawbotSentences = data.reply.split(/([.?!])\s+/);
-        for (let i = 0; i < rawbotSentences.length; i += 2) {
-            const botSentence = (rawbotSentences[i] || '') + (rawbotSentences[i + 1] || '');
-            if (botSentence.trim()) {
-                const p = document.createElement("p");
-                p.className = "bot-msg";
-                p.innerHTML = `<b>Bojack:</b> ${botSentence.trim()}`;
-                chatLog.appendChild(p);
+        const sentences = data.reply.match(/[^.!?]+[.!?]*\s*/g) || [];
+
+        for (const sentence of sentences) {
+            if (sentence.trim()) {
+                appendMessage("Bojack", sentence.trim(), "bot-msg");
             }
         }
 
         input.value = "";
         chatLog.scrollTop = chatLog.scrollHeight;
     }
+
+    // Appends messages to the chat log
+    function appendMessage(speaker, message, className) {
+        const paragraph = document.createElement("p");
+        paragraph.className = className;
+
+        const label = document.createElement("b");
+        label.textContent = `${speaker}:`;
+
+        paragraph.appendChild(label);
+        paragraph.appendChild(document.createTextNode(` ${message}`));
+
+        chatLog.appendChild(paragraph);
+    }
+
 
     // Send message on button click
     sendButton.addEventListener("click", sendMessage);

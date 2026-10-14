@@ -1,14 +1,11 @@
-from urllib import request
-from django.shortcuts import get_object_or_404, render
-from django.contrib import messages
-from shelter.models import *
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
+from shelter.models import Animal, AnimalType
 from django.contrib.auth import login
 from django.conf import settings
-from .forms import CustomUserCreationForm
-
+from .forms import CustomUserCreationForm, CustomLoginForm
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.auth.views import LoginView
-from .forms import CustomLoginForm
+from django.urls import reverse
 
 
 # Create your views here.
@@ -24,21 +21,31 @@ def home(request):
     return render(request,'shelter/home.html',context)
 
 def animal_list(request):
-    animals = Animal.objects.filter(status='available').order_by('-arrival_date')
+    
+    animals = Animal.objects.filter(
+        status='available'
+        ).order_by('-arrival_date')
 
     # Fetch all animal types for filtering
     animal_types = AnimalType.objects.all()
-
     # Animal Type Filtering
     animal_type_id = request.GET.get('animal_type')
+    selected_animal_type = None
+    
     if animal_type_id:
-        animals = animals.filter(animal_type_id = animal_type_id)
-
+        try:
+            selected_animal_type = int(animal_type_id)
+        except(TypeError, ValueError):            
+            # Ignore malformed filter values.
+            selected_animal_type = None
+            
+    if selected_animal_type is not None:
+        animals = animals.filter(animal_type_id = selected_animal_type)
 
     context={
         'animals': animals,
         'animal_types': animal_types,
-        'selected_animal_type':int(animal_type_id)if animal_type_id else None,
+        'selected_animal_type':selected_animal_type,
     }
 
     return render(request,'shelter/animal_list.html',context)
@@ -54,10 +61,19 @@ def signup(request):
             user = form.save()
             login(request, user)  # log in immediately
             # Redirect to ?next= if provided, otherwise to LOGIN_REDIRECT_URL
-            return redirect(request.GET.get("next", settings.LOGIN_REDIRECT_URL))
+            redirect_to = request.GET.get("next")
+            if not redirect_to or not url_has_allowed_host_and_scheme(
+                url = redirect_to,
+                allowed_hosts = {request.get_host()},
+                require_https = request.is_secure(),
+            ):
+                redirect_to = reverse(settings.LOGIN_REDIRECT_URL)
+                
+            return redirect(redirect_to)
+
     else:
         form = CustomUserCreationForm()
-    print(form.errors)
+        
     return render(request, "registration/signup.html", {"form": form})
 
 class CustomLoginView(LoginView):
