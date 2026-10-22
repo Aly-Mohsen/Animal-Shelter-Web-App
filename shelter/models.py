@@ -14,19 +14,48 @@ GOVERNORATE_CHOICES = [
 ]
 
 class CustomUser(AbstractUser):
+    ACCOUNT_TYPE_CHOICES = [
+        ("individual", "Individual"),
+        ("shelter", "Shelter")
+    ]
+
+    account_type = models.CharField(max_length=20,
+                                    choices=ACCOUNT_TYPE_CHOICES,
+                                    default="individual"
+                                    )
+
     full_name = models.CharField(max_length=150, blank=False)
     phone = models.CharField(
-        max_length=20, 
-        blank=True, 
-        null=True, 
+        max_length=20,
+        blank=True,
+        null=True,
     )
-    governorate = models.CharField(max_length=100, choices=GOVERNORATE_CHOICES, blank=True, null=True)
+    governorate = models.CharField(max_length=100,
+                                   choices=GOVERNORATE_CHOICES,
+                                   blank=True,
+                                   null=True)
     address = models.TextField(blank=True, null=True)
-    profile_photo = models.ImageField(upload_to="users/", blank=True, null=True)
+    profile_photo = models.ImageField(upload_to="users/",
+                                      blank=True,
+                                      null=True
+    )
 
     def __str__(self):
         return self.username
 
+class ShelterProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="shelter_profile",
+        )
+    name = models.CharField(max_length=150)
+    description = models.TextField(blank=True)
+    contact_email = models.EmailField(blank=True)
+    is_verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
 
 class AnimalType(models.Model):
     name = models.CharField(max_length=50)
@@ -59,13 +88,44 @@ class Animal(models.Model):
     ]
 
     name = models.CharField(max_length=100)
-    animal_type = models.ForeignKey(AnimalType, on_delete=models.PROTECT)
-    breed = models.ForeignKey(Breed, on_delete=models.PROTECT, blank=True, null=True)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='M')
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="owned_animals",
+    )
+    posted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="animal_listings",
+    )
+    animal_type = models.ForeignKey(
+        AnimalType,
+        on_delete=models.PROTECT,
+        )
+    breed = models.ForeignKey(
+        Breed,
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+    )
+    gender = models.CharField(
+        max_length=1,
+        choices=GENDER_CHOICES,
+        default='M',
+    )
     age = models.PositiveIntegerField(validators=[MinValueValidator(0)])
-    weight = models.DecimalField(max_digits=5, decimal_places=2, help_text="Weight in kg")
+    weight = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        help_text="Weight in kg",
+    )
     description = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='available')
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='available',
+    )
     arrival_date = models.DateField(default=timezone.now)
     adoption_date = models.DateField(null=True, blank=True)
     special_needs = models.TextField(blank=True)

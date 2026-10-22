@@ -9,6 +9,7 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = CustomUser
         fields = (
+            "account_type",
             "username",
             "email",
             "full_name",
@@ -46,6 +47,7 @@ class CustomUserCreationForm(UserCreationForm):
         self.helper.field_class = "mb-3"
 
         self.helper.layout = Layout(
+            "account_type",
             Row(
                 Column("username", css_class="col-md-6"),
                 Column("email", css_class="col-md-6"),

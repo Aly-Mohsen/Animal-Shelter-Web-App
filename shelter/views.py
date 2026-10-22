@@ -1,11 +1,12 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from shelter.models import Animal, AnimalType
+from shelter.models import Animal, AnimalType, ShelterProfile
 from django.contrib.auth import login
 from django.conf import settings
 from .forms import CustomUserCreationForm, CustomLoginForm
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.auth.views import LoginView
 from django.urls import reverse
+from django.db import transaction
 
 
 # Create your views here.
@@ -21,7 +22,7 @@ def home(request):
     return render(request,'shelter/home.html',context)
 
 def animal_list(request):
-    
+
     animals = Animal.objects.filter(
         status='available'
         ).order_by('-arrival_date')
@@ -31,14 +32,14 @@ def animal_list(request):
     # Animal Type Filtering
     animal_type_id = request.GET.get('animal_type')
     selected_animal_type = None
-    
+
     if animal_type_id:
         try:
             selected_animal_type = int(animal_type_id)
-        except(TypeError, ValueError):            
+        except(TypeError, ValueError):
             # Ignore malformed filter values.
             selected_animal_type = None
-            
+
     if selected_animal_type is not None:
         animals = animals.filter(animal_type_id = selected_animal_type)
 
@@ -58,8 +59,17 @@ def signup(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
-            user = form.save()
+            with transaction.atomic():
+                user = form.save()
+
+                if user.account_type == 'shelter':
+                    ShelterProfile.objects.create(
+                        user=user,
+                        name = user.full_name,
+                        contact_email = user.email,
+                    )
             login(request, user)  # log in immediately
+
             # Redirect to ?next= if provided, otherwise to LOGIN_REDIRECT_URL
             redirect_to = request.GET.get("next")
             if not redirect_to or not url_has_allowed_host_and_scheme(
@@ -68,12 +78,12 @@ def signup(request):
                 require_https = request.is_secure(),
             ):
                 redirect_to = reverse(settings.LOGIN_REDIRECT_URL)
-                
+
             return redirect(redirect_to)
 
     else:
         form = CustomUserCreationForm()
-        
+
     return render(request, "registration/signup.html", {"form": form})
 
 class CustomLoginView(LoginView):

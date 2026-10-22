@@ -11,11 +11,17 @@ def animal_types(db):
 
 
 @pytest.fixture
-def animals(db, animal_types):
+def animals(db, animal_types, django_user_model):
     dog_type, cat_type = animal_types
+
+    poster = django_user_model.objects.create_user(
+        username="test_poster",
+        password="test-password",
+    )
 
     available_dog = Animal.objects.create(
         name="Buddy",
+        posted_by=poster,
         animal_type=dog_type,
         age=3,
         weight="12.50",
@@ -23,6 +29,7 @@ def animals(db, animal_types):
     )
     available_cat = Animal.objects.create(
         name="Mittens",
+        posted_by=poster,
         animal_type=cat_type,
         age=2,
         weight="4.20",
@@ -30,6 +37,7 @@ def animals(db, animal_types):
     )
     pending_dog = Animal.objects.create(
         name="Rex",
+        posted_by=poster,
         animal_type=dog_type,
         age=5,
         weight="20.00",
@@ -122,6 +130,7 @@ def test_animal_detail_returns_404_for_missing_animal(client):
 @pytest.fixture
 def valid_signup_data():
     return {
+        "account_type": "individual",
         "username": "test_adopter",
         "email": "adopter@example.com",
         "full_name": "Test Adopter",
@@ -209,3 +218,23 @@ def test_signup_rejects_protocol_relative_next_url(
 
     assert response.status_code == 302
     assert response.url == reverse(settings.LOGIN_REDIRECT_URL)
+
+
+@pytest.mark.django_db
+def test_shelter_signup_creates_shelter_profile(
+    client, valid_signup_data
+):
+    valid_signup_data["account_type"] = "shelter"
+
+    response = client.post(
+        reverse("shelter:signup"),
+        valid_signup_data,
+    )
+
+    assert response.status_code == 302
+
+    user = CustomUser.objects.get(username="test_adopter")
+
+    assert user.account_type == "shelter"
+    assert user.shelter_profile.name == user.full_name
+    assert user.shelter_profile.contact_email == user.email
