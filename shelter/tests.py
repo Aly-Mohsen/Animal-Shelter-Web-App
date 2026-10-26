@@ -1,7 +1,9 @@
 import pytest
 from django.urls import reverse
-from shelter.models import Animal, AnimalType, CustomUser
+from shelter.models import Animal, AnimalType, CustomUser, Breed
 from django.conf import settings
+from shelter.forms import AnimalListingForm
+from datetime import date
 
 @pytest.fixture
 def animal_types(db):
@@ -238,3 +240,202 @@ def test_shelter_signup_creates_shelter_profile(
     assert user.account_type == "shelter"
     assert user.shelter_profile.name == user.full_name
     assert user.shelter_profile.contact_email == user.email
+    
+    
+@pytest.mark.django_db
+def test_animal_listing_form_accepts_matching_breed_and_animal_type(animal_types):
+    dog_type, _ = animal_types
+    dog_breed = Breed.objects.create(
+        name="Labrador",
+        animal_type=dog_type,
+    )
+    form = AnimalListingForm(
+        data={
+            "name" : "Buddy",
+            "animal_type": str(dog_type.pk),
+            "breed" : str(dog_breed.pk),
+            "age" : 3,
+            "weight" : "12.50",
+            "gender": "M",
+            "arrival_date": "2026-01-15",
+        }
+    )
+    assert form.is_valid(), form.errors
+    
+@pytest.mark.django_db
+def test_animal_listing_form_rejects_mismatched_breed(animal_types):
+    dog_type, cat_type = animal_types
+    cat_breed = Breed.objects.create(
+        name="Persian",
+        animal_type=cat_type,
+    )
+
+    form = AnimalListingForm(
+        data={
+            "name": "Buddy",
+            "animal_type": str(dog_type.pk),
+            "breed": str(cat_breed.pk),
+            "age": "3",
+            "weight": "12.50",
+            "gender": "M",
+            "arrival_date": "2026-01-15",
+        }
+    )
+
+    assert not form.is_valid()
+    assert "breed" in form.errors
+
+
+@pytest.mark.django_db
+def test_animal_listing_form_accepts_missing_optional_breed(animal_types):
+    dog_type, _ = animal_types
+
+    form = AnimalListingForm(
+        data={
+            "name": "Buddy",
+            "animal_type": str(dog_type.pk),
+            "breed": "",
+            "age": "3",
+            "weight": "12.50",
+            "gender": "M",
+            "arrival_date": "2026-01-15",
+        }
+    )
+
+    assert form.is_valid(), form.errors
+
+
+@pytest.mark.django_db
+def test_animal_listing_form_rejects_missing_name(animal_types):
+    dog_type, _ = animal_types
+
+    form = AnimalListingForm(
+        data={
+            "animal_type": str(dog_type.pk),
+            "breed": "",
+            "age": "3",
+            "weight": "12.50",
+            "gender": "M",
+            "arrival_date": "2026-01-15",
+        }
+    )
+
+    assert not form.is_valid()
+    assert "name" in form.errors
+    
+    
+@pytest.mark.django_db
+def test_anonymous_user_cannot_create_animal_listing(client):
+    response = client.get(reverse("shelter:animal_create"))
+
+    assert response.status_code == 302
+    assert reverse("shelter:login") in response.url
+
+
+@pytest.mark.django_db
+def test_authenticated_user_can_create_animal_listing(
+    client, django_user_model, animal_types
+):
+    user = django_user_model.objects.create_user(
+        username="listing_creator",
+        password="SafeTestPassword!739",
+    )
+    dog_type, _ = animal_types
+    client.force_login(user)
+
+    response = client.post(
+        reverse("shelter:animal_create"),
+        {
+            "name": "Buddy",
+            "animal_type": str(dog_type.pk),
+            "breed": "",
+            "gender": "M",
+            "age": "3",
+            "weight": "12.50",
+            "description": "Friendly dog",
+            "arrival_date": "2026-01-15",
+            "special_needs": "",
+            "is_vaccinated": "on",
+            "is_spayed_neutered": "",
+        },
+    )
+
+    assert response.status_code == 302
+
+    animal = Animal.objects.get(name="Buddy")
+    assert animal.posted_by == user
+    assert animal.status == "available"
+    assert animal.is_vaccinated is True
+
+    assert response.url == reverse(
+        "shelter:animal_detail",
+        kwargs={"pk": animal.pk},
+    )
+
+
+@pytest.mark.django_db
+def test_invalid_animal_listing_is_not_saved(
+    client, django_user_model, animal_types
+):
+    user = django_user_model.objects.create_user(
+        username="invalid_listing_user",
+        password="SafeTestPassword!739",
+    )
+    dog_type, _ = animal_types
+    client.force_login(user)
+
+    response = client.post(
+        reverse("shelter:animal_create"),
+        {
+            "name": "",
+            "animal_type": str(dog_type.pk),
+            "breed": "",
+            "gender": "M",
+            "age": "3",
+            "weight": "12.50",
+            "arrival_date": "2026-01-15",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.context["form"].errors
+    assert not Animal.objects.filter(
+        posted_by=user
+    ).exists()
+
+
+@pytest.mark.django_db
+def test_animal_listing_ignores_forged_owner_and_status(
+    client, django_user_model, animal_types
+):
+    user = django_user_model.objects.create_user(
+        username="real_poster",
+        password="SafeTestPassword!739",
+    )
+    other_user = django_user_model.objects.create_user(
+        username="other_user",
+        password="SafeTestPassword!739",
+    )
+    dog_type, _ = animal_types
+    client.force_login(user)
+
+    response = client.post(
+        reverse("shelter:animal_create"),
+        {
+            "name": "Buddy",
+            "animal_type": str(dog_type.pk),
+            "breed": "",
+            "gender": "M",
+            "age": "3",
+            "weight": "12.50",
+            "arrival_date": "2026-01-15",
+            "posted_by": str(other_user.pk),
+            "status": "adopted",
+        },
+    )
+
+    assert response.status_code == 302
+
+    animal = Animal.objects.get(name="Buddy")
+    assert animal.posted_by == user
+    assert animal.status == "available"

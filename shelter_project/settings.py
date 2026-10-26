@@ -157,7 +157,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Redirects after login/logout
 LOGIN_REDIRECT_URL = "shelter:home"
 LOGOUT_REDIRECT_URL = "shelter:home"
-LOGIN_URL = "login"
+LOGIN_URL = "shelter:login"
 
 
 AUTH_USER_MODEL = "shelter.CustomUser"

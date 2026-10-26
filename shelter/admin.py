@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import AnimalType, Breed, Animal, AdoptionApplication, AnimalPhoto
 
-# Register your models here.
 
 
 class AnimalPhotoInline(admin.TabularInline):
@@ -29,14 +28,13 @@ class AnimalAdmin(admin.ModelAdmin):
     )
 
 
-
 class AdoptionApplicationAdmin(admin.ModelAdmin):
     list_display = ('animal','applicant','status','application_date')
     list_filter= ('status','application_date')
     search_fields = ('animal__name','applicant__username','living_situation')
     raw_id_fields = ('animal', 'applicant')
 
-
+# Register your models here.
 admin.site.register(AnimalType)
 admin.site.register(Breed)
 admin.site.register(AnimalPhoto)

@@ -10,6 +10,8 @@ urlpatterns = [
     path('',views.home, name = 'home'),
     path('animals/',views.animal_list,name = 'animal_list',),
     path("animals/<int:pk>/", views.animal_detail, name="animal_detail"),
+    path("animals/create/", views.animal_create, name = "animal_create"),
+
 
     # Auth
     path("login/", CustomLoginView.as_view(), name="login"),

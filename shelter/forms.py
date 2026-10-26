@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Submit, Field
-from .models import CustomUser
+from .models import CustomUser, Animal, Breed
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -80,3 +80,33 @@ class CustomLoginForm(AuthenticationForm):
             Field("username", placeholder="Enter your username"),
             Field("password", placeholder="Enter your password"),
         )
+
+class AnimalListingForm(forms.ModelForm):
+    class Meta:
+        model = Animal
+        fields = (
+            "name",
+            "animal_type",
+            "breed",
+            "gender",
+            "age",
+            "weight",
+            "description",
+            "arrival_date",
+            "special_needs",
+            "is_vaccinated",
+            "is_spayed_neutered",
+        )
+    def clean(self):
+        cleaned_data = super().clean()
+        animal_type = cleaned_data.get("animal_type")
+        breed = cleaned_data.get("breed")
+        
+        if animal_type and breed and breed.animal_type_id != animal_type.id:
+            self.add_error(
+                "breed",
+                "Select a breed that  belongs to  the chosen animal type"
+            )
+        return cleaned_data
+        
+    

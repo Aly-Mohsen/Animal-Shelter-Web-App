@@ -2,11 +2,18 @@ from django.shortcuts import get_object_or_404, render, redirect
 from shelter.models import Animal, AnimalType, ShelterProfile
 from django.contrib.auth import login
 from django.conf import settings
-from .forms import CustomUserCreationForm, CustomLoginForm
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.auth.views import LoginView
 from django.urls import reverse
 from django.db import transaction
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .forms import (
+    CustomUserCreationForm,
+    CustomLoginForm,
+    AnimalListingForm,
+    )
+
 
 
 # Create your views here.
@@ -55,6 +62,39 @@ def animal_detail(request, pk):
     animal = get_object_or_404(Animal, pk=pk)
     return render(request, "shelter/animal_detail.html", {"animal": animal})
 
+@login_required
+def animal_create(request):
+    #TODO: check if we need to assign status from submitted data or need another approach
+    if request.method == "POST":
+        form = AnimalListingForm(request.POST)
+    
+        if form.is_valid():
+            animal = form.save(commit=False)
+            
+            #Server Controled Values
+            animal.posted_by = request.user
+            
+            animal.save()
+            
+            messages.success(
+                request,
+                "your animal listing has been created successfully"
+            )
+            
+            return redirect(
+                "shelter:animal_detail",
+                pk=animal.pk,
+            )
+    else:
+        form = AnimalListingForm()
+        
+    return render(
+        request,
+        "shelter/animal_create.html",
+        {"form":form}
+    )
+    
+
 def signup(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST, request.FILES)
@@ -85,7 +125,7 @@ def signup(request):
         form = CustomUserCreationForm()
 
     return render(request, "registration/signup.html", {"form": form})
-
+            
 class CustomLoginView(LoginView):
     authentication_form = CustomLoginForm
     template_name = "registration/login.html"
