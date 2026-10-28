@@ -4,6 +4,7 @@ from shelter.models import Animal, AnimalType, CustomUser, Breed
 from django.conf import settings
 from shelter.forms import AnimalListingForm
 from datetime import date
+from decimal import Decimal
 
 @pytest.fixture
 def animal_types(db):
@@ -365,8 +366,16 @@ def test_authenticated_user_can_create_animal_listing(
     animal = Animal.objects.get(name="Buddy")
     assert animal.posted_by == user
     assert animal.status == "available"
+    assert animal.animal_type == dog_type
+    assert animal.breed is None
+    assert animal.gender == "M"
+    assert animal.age == 3
+    assert animal.weight == Decimal("12.50")
+    assert animal.description == "Friendly dog"
+    assert animal.arrival_date == date(2026, 1, 15)
+    assert animal.special_needs == ""
     assert animal.is_vaccinated is True
-
+    assert animal.is_spayed_neutered is False
     assert response.url == reverse(
         "shelter:animal_detail",
         kwargs={"pk": animal.pk},
@@ -387,18 +396,18 @@ def test_invalid_animal_listing_is_not_saved(
     response = client.post(
         reverse("shelter:animal_create"),
         {
-            "name": "",
+            "name": "Buddy",
             "animal_type": str(dog_type.pk),
             "breed": "",
             "gender": "M",
             "age": "3",
-            "weight": "12.50",
+            "weight": "abc",
             "arrival_date": "2026-01-15",
         },
     )
 
     assert response.status_code == 200
-    assert response.context["form"].errors
+    assert "weight" in response.context["form"].errors
     assert not Animal.objects.filter(
         posted_by=user
     ).exists()
@@ -425,6 +434,7 @@ def test_animal_listing_ignores_forged_owner_and_status(
             "name": "Buddy",
             "animal_type": str(dog_type.pk),
             "breed": "",
+            "owner":str(other_user.pk),
             "gender": "M",
             "age": "3",
             "weight": "12.50",
@@ -435,7 +445,7 @@ def test_animal_listing_ignores_forged_owner_and_status(
     )
 
     assert response.status_code == 302
-
     animal = Animal.objects.get(name="Buddy")
     assert animal.posted_by == user
     assert animal.status == "available"
+    assert animal.owner is None
